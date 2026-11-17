@@ -1,0 +1,108 @@
+#include <Servo.h>
+
+const int pinIN3 = 12;
+const int pinIN4 = 13;
+const int pinBoton = 2;
+const int pinLedRojo = 4;
+const int pinLedVerde = 5;
+const int pinLedAmarillo = 6; 
+
+const int pinServoHex = 9;
+const int pinServoMar = 10;
+
+Servo servoHexagonal;
+Servo servoMariposa;
+
+int anguloHexReposo = 9;   
+int anguloHexAbierto = 90; 
+
+int anguloMarReposo = 0;   
+int anguloMarAbierto = 90; 
+
+char estadoVision = '2'; 
+
+void setup() {
+  pinMode(pinIN3, OUTPUT);
+  pinMode(pinIN4, OUTPUT);
+  pinMode(pinLedRojo, OUTPUT);
+  pinMode(pinLedVerde, OUTPUT);
+  pinMode(pinLedAmarillo, OUTPUT); 
+  
+  pinMode(pinBoton, INPUT_PULLUP); 
+
+  servoHexagonal.attach(pinServoHex);
+  servoMariposa.attach(pinServoMar);
+  
+  servoHexagonal.write(anguloHexReposo);
+  servoMariposa.write(anguloMarReposo);
+  
+  delay(500);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char comando = Serial.read();
+    
+    while (Serial.available() > 0) {
+      Serial.read();
+    }
+
+    if (comando == '0' || comando == '1' || comando == '2' || comando == '3') {
+      estadoVision = comando;
+
+      if (comando == '1') {
+        servoHexagonal.write(anguloHexReposo);  
+        servoMariposa.write(anguloMarReposo);               
+      }
+      
+      else if (comando == '3') {
+        delay(3500);
+        servoHexagonal.write(anguloHexAbierto);
+        delay(2500);
+        servoHexagonal.write(anguloHexReposo);
+      }
+
+      else if (comando == '0') {
+        delay(3000);
+        servoHexagonal.write(anguloHexAbierto);
+        delay(2500);
+        servoHexagonal.write(anguloHexReposo);
+        delay(500);                            
+        servoMariposa.write(anguloMarAbierto);
+        delay(2500);
+        servoMariposa.write(anguloMarReposo);
+      }
+    }
+  }
+  
+  if (digitalRead(pinBoton) == LOW) {
+    if (estadoVision == '2') {
+      digitalWrite(pinIN3, HIGH);
+      digitalWrite(pinIN4, LOW);
+      digitalWrite(pinLedAmarillo, HIGH);
+      digitalWrite(pinLedVerde, LOW);
+      digitalWrite(pinLedRojo, LOW);
+    }
+    else if (estadoVision == '1' || estadoVision == '3') {
+      digitalWrite(pinIN3, HIGH);
+      digitalWrite(pinIN4, LOW);
+      digitalWrite(pinLedAmarillo, LOW);
+      digitalWrite(pinLedVerde, HIGH);
+      digitalWrite(pinLedRojo, LOW);
+    } 
+    else if (estadoVision == '0') {
+      digitalWrite(pinIN3, HIGH);
+      digitalWrite(pinIN4, LOW);
+      digitalWrite(pinLedAmarillo, LOW);
+      digitalWrite(pinLedVerde, LOW);
+      digitalWrite(pinLedRojo, HIGH);
+    }
+  } else {
+    digitalWrite(pinIN3, LOW);
+    digitalWrite(pinIN4, LOW);
+    digitalWrite(pinLedAmarillo, LOW);
+    digitalWrite(pinLedVerde, LOW);
+    digitalWrite(pinLedRojo, LOW);
+  }
+}
